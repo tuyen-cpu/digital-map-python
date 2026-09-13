@@ -106,7 +106,7 @@ class Command(BaseCommand):
         if options['path']:
             json_path = Path(options['path'])
         else:
-            json_path = Path(settings.BASE_DIR).parent / 'binh-dinh-tourism-react' / 'src' / 'data' / 'locations.json'
+            json_path = Path(settings.BASE_DIR).parent / 'digital-map-react' / 'src' / 'data' / 'locations.json'
 
         if not json_path.exists():
             self.stderr.write(self.style.ERROR(f'File not found: {json_path}'))

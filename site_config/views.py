@@ -22,7 +22,10 @@ class SiteSettingsView(APIView):
 
     def get(self, request):
         obj = SiteSettings.get_solo()
-        return Response(SiteSettingsSerializer(obj).data)
+        response = Response(SiteSettingsSerializer(obj).data)
+        response['Cache-Control'] = 'no-store, no-cache, must-revalidate'
+        response['Pragma'] = 'no-cache'
+        return response
 
     def put(self, request):
         serializer = SiteSettingsUpdateSerializer(data=request.data)

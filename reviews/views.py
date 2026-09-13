@@ -9,6 +9,45 @@ from .models import Review, ReviewReply
 from .serializers import ReviewSerializer, ReviewCreateSerializer, ReviewReplyCreateSerializer
 
 
+# ---------------------------------------------------------------------------
+# GET /api/reviews/  — admin lấy tất cả, manager lấy trong phạm vi
+# ---------------------------------------------------------------------------
+class AllReviewsView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        user = request.user
+        if user.role not in ('admin', 'manager'):
+            return Response({'detail': 'Chỉ admin hoặc manager được xem tất cả đánh giá.'}, status=status.HTTP_403_FORBIDDEN)
+
+        qs = Review.objects.select_related('user', 'location').prefetch_related('replies__user')
+
+        if user.role == 'manager':
+            # Lọc theo phạm vi phân quyền của manager
+            perms = getattr(user, 'manager_permission', None)
+            if perms:
+                from django.db.models import Q
+                q = Q()
+                cats = perms.categories or []
+                groups = perms.groups or []
+                subgroups = perms.subgroups or []
+                if cats:
+                    q |= Q(location__category__in=cats)
+                if groups:
+                    q |= Q(location__group__in=groups)
+                if subgroups:
+                    q |= Q(location__subgroup__in=subgroups)
+                if q:
+                    qs = qs.filter(q)
+                else:
+                    qs = qs.none()
+            else:
+                qs = qs.none()
+
+        qs = qs.order_by('-created_at')
+        return Response({'count': qs.count(), 'results': ReviewSerializer(qs, many=True).data})
+
+
 def _can_moderate(user, location):
     """Admin or manager within scope can moderate reviews."""
     return can_manage_location(user, location)
