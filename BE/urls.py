@@ -8,4 +8,5 @@ urlpatterns = [
     path('api/', include('travel.urls')),
     path('api/', include('analytics.urls')),
     path('api/', include('site_config.urls')),
+    path('api/media/', include('media_upload.urls')),
 ]

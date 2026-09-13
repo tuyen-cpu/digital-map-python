@@ -47,6 +47,7 @@ INSTALLED_APPS = [
     'travel',
     'analytics',
     'site_config',
+    'media_upload',
 ]
 
 MIDDLEWARE = [
@@ -172,5 +173,20 @@ USE_TZ = True
 # ---------------------------------------------------------------------------
 STATIC_URL = 'static/'
 STATIC_ROOT = BASE_DIR / 'staticfiles'
+
+# ---------------------------------------------------------------------------
+# Cloudflare R2 — media upload
+# ---------------------------------------------------------------------------
+R2_ACCOUNT_ID = env('R2_ACCOUNT_ID', default='')
+R2_ACCESS_KEY_ID = env('R2_ACCESS_KEY_ID', default='')
+R2_SECRET_ACCESS_KEY = env('R2_SECRET_ACCESS_KEY', default='')
+R2_BUCKET_NAME = env('R2_BUCKET_NAME', default='binh-dinh-tourism')
+R2_PUBLIC_URL = env('R2_PUBLIC_URL', default='').rstrip('/')
+# Endpoint S3-compatible của R2
+R2_ENDPOINT_URL = f'https://{R2_ACCOUNT_ID}.r2.cloudflarestorage.com' if R2_ACCOUNT_ID else ''
+
+# Giới hạn upload
+MEDIA_UPLOAD_MAX_BYTES = 10 * 1024 * 1024   # 10 MB
+MEDIA_ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/gif']
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'

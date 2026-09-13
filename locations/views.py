@@ -44,6 +44,7 @@ class LocationListView(APIView):
                 Q(group__icontains=q) |
                 Q(subgroup__icontains=q)
             )
+        # Không phân trang — frontend cần load toàn bộ để hiển thị bản đồ
         serializer = LocationListSerializer(qs, many=True)
         return Response({'count': qs.count(), 'results': serializer.data})
 
@@ -52,20 +53,20 @@ class LocationListView(APIView):
         if not user.is_authenticated or user.role not in ('admin', 'manager'):
             return Response({'detail': 'Tài khoản không có quyền quản lý địa điểm.'}, status=status.HTTP_403_FORBIDDEN)
 
-        serializer = LocationSerializer(data=request.data)
-        if not serializer.is_valid():
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
         category = request.data.get('category', 'utility')
         if user.role == 'manager' and not can_manage_category(user, category):
             return Response({'detail': 'Bạn không có quyền thêm địa điểm vào nhóm này.'}, status=status.HTTP_403_FORBIDDEN)
 
-        # Generate ID if not provided
-        location_id = str(request.data.get('id', '')).strip()
-        if not location_id:
-            location_id = _make_location_id(request.data.get('name', ''))
+        # Generate ID trước khi validate để serializer không báo lỗi required
+        data = request.data.copy() if hasattr(request.data, 'copy') else dict(request.data)
+        if not str(data.get('id', '')).strip():
+            data['id'] = _make_location_id(data.get('name', ''))
 
-        location = serializer.save(id=location_id)
+        serializer = LocationSerializer(data=data)
+        if not serializer.is_valid():
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+        location = serializer.save()
         return Response(LocationSerializer(location).data, status=status.HTTP_201_CREATED)
 
 
