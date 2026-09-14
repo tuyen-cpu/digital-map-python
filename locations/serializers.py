@@ -1,6 +1,11 @@
 from rest_framework import serializers
-
 from .models import Location
+from .category_models import Category
+
+
+def _valid_category_keys():
+    """Fetch active category keys from DB — cached per request cycle."""
+    return set(Category.objects.filter(is_active=True).values_list('key', flat=True))
 
 
 class LocationSerializer(serializers.ModelSerializer):
@@ -35,6 +40,15 @@ class LocationSerializer(serializers.ModelSerializer):
 
     def validate_videos(self, value):
         return self._validate_media_list(value, 'videos')
+
+    def validate_category(self, value):
+        valid = _valid_category_keys()
+        # Fallback: if DB empty (first run), allow any non-empty string
+        if valid and value not in valid:
+            raise serializers.ValidationError(
+                f'"{value}" không phải danh mục hợp lệ. Các danh mục hiện có: {", ".join(sorted(valid))}'
+            )
+        return value
 
     def _validate_media_list(self, value, field_name):
         if not isinstance(value, list):

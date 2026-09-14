@@ -1,26 +1,12 @@
 from django.db import models
-
-CATEGORY_CHOICES = [
-    ('tourism', 'Du lịch'),
-    ('food', 'Ẩm thực'),
-    ('accommodation', 'Lưu trú'),
-    ('administration', 'Hành chính'),
-    ('utility', 'Tiện ích'),
-    ('heritage', 'Di sản'),
-    ('education', 'Giáo dục'),
-    ('health', 'Y tế'),
-    ('religion', 'Tôn giáo'),
-    ('shopping', 'Mua sắm'),
-    ('sport', 'Thể thao'),
-    ('other', 'Khác'),
-]
+from .category_models import Category  # noqa: F401 — re-export for convenience
 
 
 class Location(models.Model):
-    # Slug-based primary key (e.g. "dinh-tan-an-123abc")
     id = models.CharField(max_length=200, primary_key=True)
     name = models.CharField(max_length=300)
-    category = models.CharField(max_length=50, choices=CATEGORY_CHOICES, default='utility')
+    # Free-form CharField — validated against Category.key at serializer level
+    category = models.CharField(max_length=50, default='utility')
     group = models.CharField(max_length=200, blank=True, default='')
     subgroup = models.CharField(max_length=200, blank=True, default='')
     address = models.TextField(blank=True, default='')
@@ -40,7 +26,6 @@ class Location(models.Model):
     image_alt = models.CharField(max_length=300, null=True, blank=True)
     image_source_url = models.CharField(max_length=500, null=True, blank=True)
     image_source_name = models.CharField(max_length=300, null=True, blank=True)
-    # JSONField: [{url, alt, name}]
     gallery = models.JSONField(default=list)
     panoramas = models.JSONField(default=list)
     videos = models.JSONField(default=list)

@@ -64,10 +64,26 @@ def _map_item(item):
         else:
             website = website_email
 
+    # Normalize legacy categories to new list
+    CATEGORY_MAP = {
+        'accommodation': 'lodging',
+        'heritage': 'tourism',
+        'education': 'utility',
+        'religion': 'tourism',
+        'shopping': 'utility',
+        'sport': 'entertainment',
+        'other': 'utility',
+    }
+    raw_category = str(item.get('category') or 'utility').strip()
+    category = CATEGORY_MAP.get(raw_category, raw_category)
+    valid = {'tourism', 'lodging', 'food', 'entertainment', 'health', 'administration', 'utility'}
+    if category not in valid:
+        category = 'utility'
+
     return {
         'id': str(item.get('id') or '').strip() or _make_id(item.get('name', '')),
         'name': str(item.get('name') or '').strip(),
-        'category': str(item.get('category') or 'utility').strip(),
+        'category': category,   # normalized
         'group': str(item.get('group') or '').strip(),
         'subgroup': str(item.get('subgroup') or '').strip(),
         'address': str(item.get('address') or '').strip(),
