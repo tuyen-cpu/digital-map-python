@@ -111,18 +111,18 @@ def _map_item(item):
 
 
 class Command(BaseCommand):
-    help = 'Seed Location data from binh-dinh-tourism-react/src/data/locations.json'
+    help = 'Seed Location data from BE/datasourc/locations.json'
 
     def add_arguments(self, parser):
         parser.add_argument('--clear', action='store_true', help='Delete all locations before seeding')
         parser.add_argument('--path', type=str, default=None, help='Custom path to locations.json')
 
     def handle(self, *args, **options):
-        # Resolve path
+        # Resolve path — mặc định tìm trong BE/datasourc/locations.json
         if options['path']:
             json_path = Path(options['path'])
         else:
-            json_path = Path(settings.BASE_DIR).parent / 'digital-map-react' / 'src' / 'data' / 'locations.json'
+            json_path = Path(settings.BASE_DIR) / 'datasourc' / 'locations.json'
 
         if not json_path.exists():
             self.stderr.write(self.style.ERROR(f'File not found: {json_path}'))
