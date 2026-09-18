@@ -186,7 +186,11 @@ R2_PUBLIC_URL = env('R2_PUBLIC_URL', default='').rstrip('/')
 R2_ENDPOINT_URL = f'https://{R2_ACCOUNT_ID}.r2.cloudflarestorage.com' if R2_ACCOUNT_ID else ''
 
 # Giới hạn upload
-MEDIA_UPLOAD_MAX_BYTES = 10 * 1024 * 1024   # 10 MB
-MEDIA_ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/gif']
+MEDIA_UPLOAD_MAX_BYTES = 10 * 1024 * 1024   # 10 MB cho ảnh
+MEDIA_UPLOAD_MAX_VIDEO_BYTES = 40 * 1024 * 1024  # 40 MB cho video
+MEDIA_ALLOWED_TYPES = [
+    'image/jpeg', 'image/png', 'image/webp', 'image/gif',
+    'video/mp4', 'video/webm', 'video/ogg',
+]
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'

@@ -58,15 +58,6 @@ class MediaUploadView(APIView):
                 status=status.HTTP_403_FORBIDDEN,
             )
 
-        # Validate size
-        max_bytes = settings.MEDIA_UPLOAD_MAX_BYTES
-        if file.size > max_bytes:
-            mb = max_bytes // (1024 * 1024)
-            return Response(
-                {'detail': f'File vượt quá giới hạn {mb} MB.'},
-                status=status.HTTP_400_BAD_REQUEST,
-            )
-
         # Validate MIME type
         content_type = file.content_type or ''
         # Double-check bằng tên file nếu content_type không rõ
@@ -77,7 +68,21 @@ class MediaUploadView(APIView):
         allowed = settings.MEDIA_ALLOWED_TYPES
         if content_type not in allowed:
             return Response(
-                {'detail': f'Loại file không được phép. Chỉ hỗ trợ: {", ".join(allowed)}.'},
+                {'detail': f'Loại file không được phép. Chỉ hỗ trợ: image/jpeg, image/png, image/webp, image/gif, video/mp4, video/webm, video/ogg.'},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        # Validate size — video có giới hạn riêng
+        is_video = content_type.startswith('video/')
+        if is_video:
+            max_bytes = getattr(settings, 'MEDIA_UPLOAD_MAX_VIDEO_BYTES', 40 * 1024 * 1024)
+            max_label = '40 MB'
+        else:
+            max_bytes = settings.MEDIA_UPLOAD_MAX_BYTES
+            max_label = f'{max_bytes // (1024 * 1024)} MB'
+        if file.size > max_bytes:
+            return Response(
+                {'detail': f'File vượt quá giới hạn {max_label}.'},
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
