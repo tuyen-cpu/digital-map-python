@@ -36,7 +36,7 @@ def _check_r2_configured():
 # POST /api/media/upload/
 # ---------------------------------------------------------------------------
 class MediaUploadView(APIView):
-    permission_classes = [IsAuthenticated, IsAdminOrManager]
+    permission_classes = [IsAuthenticated]
 
     def post(self, request):
         if not _check_r2_configured():
@@ -48,6 +48,15 @@ class MediaUploadView(APIView):
         file = request.FILES.get('file')
         if not file:
             return Response({'detail': 'Thiếu file upload.'}, status=status.HTTP_400_BAD_REQUEST)
+
+        # Kiểm tra folder — user thường chỉ được upload vào 'avatars/'
+        folder = request.data.get('folder', 'locations').strip('/')
+        restricted_folders = ('locations', 'slides')
+        if folder in restricted_folders and request.user.role not in ('admin', 'manager'):
+            return Response(
+                {'detail': 'Bạn cần có quyền quản lý để upload vào thư mục này.'},
+                status=status.HTTP_403_FORBIDDEN,
+            )
 
         # Validate size
         max_bytes = settings.MEDIA_UPLOAD_MAX_BYTES
@@ -73,7 +82,6 @@ class MediaUploadView(APIView):
             )
 
         # Tạo key duy nhất trong bucket
-        folder = request.data.get('folder', 'locations').strip('/')
         ext = file.name.rsplit('.', 1)[-1].lower() if '.' in file.name else 'jpg'
         key = f"{folder}/{uuid.uuid4().hex}.{ext}"
 
