@@ -8,6 +8,15 @@ def _valid_category_keys():
     return set(Category.objects.filter(is_active=True).values_list('key', flat=True))
 
 
+class NullableFloatField(serializers.FloatField):
+    """FloatField that treats empty string as null instead of raising a validation error."""
+
+    def to_internal_value(self, data):
+        if data == '' or data is None:
+            return None
+        return super().to_internal_value(data)
+
+
 class LocationSerializer(serializers.ModelSerializer):
     # camelCase aliases for FE compatibility
     imageAlt = serializers.CharField(source='image_alt', allow_null=True, allow_blank=True, required=False)
@@ -18,6 +27,8 @@ class LocationSerializer(serializers.ModelSerializer):
     isActive = serializers.BooleanField(source='is_active', required=False)
     createdAt = serializers.DateTimeField(source='created_at', read_only=True)
     updatedAt = serializers.DateTimeField(source='updated_at', read_only=True)
+    lat = NullableFloatField(allow_null=True, required=False)
+    lng = NullableFloatField(allow_null=True, required=False)
 
     class Meta:
         model = Location
