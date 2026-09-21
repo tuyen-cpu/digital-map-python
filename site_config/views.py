@@ -4,15 +4,10 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from accounts.permissions import IsAdmin
-from .models import SiteSettings, DEFAULT_HERO_SLIDES
+from .models import SiteSettings, DEFAULT_HERO_SLIDES, DEFAULT_FOOTER_CONFIG
 from .serializers import SiteSettingsSerializer, SiteSettingsUpdateSerializer
 
 
-# ---------------------------------------------------------------------------
-# GET /api/site-config/         — public
-# PUT /api/site-config/         — admin only
-# POST /api/site-config/reset/  — admin only
-# ---------------------------------------------------------------------------
 class SiteSettingsView(APIView):
 
     def get_permissions(self):
@@ -38,6 +33,10 @@ class SiteSettingsView(APIView):
             obj.hero_slides = d['heroSlides']
         if 'heroIntervalMs' in d:
             obj.hero_interval_ms = d['heroIntervalMs']
+        if 'footer' in d:
+            # Partial merge: only overwrite keys that were sent, preserve the rest
+            current = obj.footer or {}
+            obj.footer = {**current, **d['footer']}
         obj.save()
         return Response(SiteSettingsSerializer(obj).data)
 
@@ -49,5 +48,6 @@ class SiteSettingsResetView(APIView):
         obj = SiteSettings.get_solo()
         obj.hero_slides = DEFAULT_HERO_SLIDES
         obj.hero_interval_ms = 5200
+        obj.footer = DEFAULT_FOOTER_CONFIG
         obj.save()
         return Response(SiteSettingsSerializer(obj).data)

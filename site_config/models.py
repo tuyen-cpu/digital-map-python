@@ -1,5 +1,16 @@
 from django.db import models
 
+DEFAULT_FOOTER_CONFIG = {
+    'orgName': 'BÌNH ĐỊNH',
+    'description': 'Khám phá điểm đến, ẩm thực, lưu trú và tiện ích trong Phường Bình Định trên một bản đồ số thống nhất.',
+    'address': '78 Lê Hồng Phong, phường Bình Định, tỉnh Gia Lai',
+    'phone': '0914.1178.00',
+    'email': 'datnt.bdh@vnpt.vn',
+    'workingHours': 'Thứ Hai – Thứ Sáu · 07:30–17:00',
+    'copyright': '© 2026 · Bản đồ du lịch số Phường Bình Định',
+    'logoUrl': '',
+}
+
 DEFAULT_HERO_SLIDES = [
     {
         'id': 'le-hong-phong',
@@ -26,6 +37,7 @@ class SiteSettings(models.Model):
     """Singleton — always use get_or_create(pk=1)."""
     hero_slides = models.JSONField(default=list)
     hero_interval_ms = models.IntegerField(default=5200)
+    footer = models.JSONField(default=dict)
 
     class Meta:
         db_table = 'site_config_settings'
@@ -40,6 +52,7 @@ class SiteSettings(models.Model):
             defaults={
                 'hero_slides': DEFAULT_HERO_SLIDES,
                 'hero_interval_ms': 5200,
+                'footer': DEFAULT_FOOTER_CONFIG,
             },
         )
         return obj
