@@ -54,16 +54,23 @@ class TravelHistoryListView(APIView):
         )
 
         if not created:
-            entry.last_action = action
-            if action == 'view':
-                entry.view_count += 1
-            elif action == 'route':
-                entry.route_count += 1
-            elif action == 'visited' and not entry.visited_at:
-                entry.visited_at = timezone.now()
-            entry.save()
+            if action == 'unvisit':
+                entry.visited_at = None
+                entry.last_action = 'view' if entry.view_count > 0 else 'route' if entry.route_count > 0 else 'view'
+                entry.save()
+            else:
+                entry.last_action = action
+                if action == 'view':
+                    entry.view_count += 1
+                elif action == 'route':
+                    entry.route_count += 1
+                elif action == 'visited' and not entry.visited_at:
+                    entry.visited_at = timezone.now()
+                entry.save()
         else:
-            if action == 'view':
+            if action == 'unvisit':
+                pass  # nothing to unvisit on new entry
+            elif action == 'view':
                 entry.view_count = 1
             elif action == 'route':
                 entry.route_count = 1

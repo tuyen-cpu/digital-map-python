@@ -21,7 +21,7 @@ class TravelHistorySerializer(serializers.ModelSerializer):
 
 class TravelHistoryRecordSerializer(serializers.Serializer):
     locationId = serializers.CharField()
-    action = serializers.ChoiceField(choices=['view', 'route', 'visited'])
+    action = serializers.ChoiceField(choices=['view', 'route', 'visited', 'unvisit'])
 
 
 class TravelReminderSerializer(serializers.ModelSerializer):
